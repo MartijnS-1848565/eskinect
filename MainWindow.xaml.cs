@@ -233,6 +233,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (skeletons.Length != 0)
                 {
+                    if (callibrator != null)
+                    {
+                        Point player = callibrator.kinectToProjectionPoint(skeletons[0].Joints[JointType.HipCenter].Position);
+
+                       Debug.Print("x: " + player.X.ToString() + " y: " + player.Y.ToString());
+                    }
                     foreach (Skeleton skel in skeletons)
                     {
                         RenderClippedEdges(skel, dc);
@@ -248,6 +254,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             this.centerPointBrush,
                             null,
                             this.SkeletonPointToScreen(skel.Position),
+                            
                             BodyCenterThickness,
                             BodyCenterThickness);
                         }
@@ -256,8 +263,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                
             }
-
+            
         }
 
         /// <summary>
@@ -393,17 +401,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     m_skeletonCalibPoints.Add(skeletons[0].Joints[JointType.HipCenter].Position);
                     Debug.WriteLine(m_skeletonCalibPoints.Count);
-                }
-                else
-                {
-                    List<Point> m_calibpoints = new List<Point>();
-                    m_calibpoints.Add(new Point(0, 0));
-                    m_calibpoints.Add(new Point(0, RenderHeight));
-                    m_calibpoints.Add(new Point(RenderWidth, RenderHeight));
-                    m_calibpoints.Add(new Point(RenderWidth, 0));
-                    callibrator = new PartialCalibrationClass(sensor, m_skeletonCalibPoints, m_calibpoints);
+                    //Debug.Print("aaaaaaa");
                 }
             }
+            else
+            {
+                List<Point> m_calibpoints = new List<Point>();
+                m_calibpoints.Add(new Point(0, 0));
+                m_calibpoints.Add(new Point(0, RenderHeight));
+                m_calibpoints.Add(new Point(RenderWidth, RenderHeight));
+                m_calibpoints.Add(new Point(RenderWidth, 0));
+                callibrator = new PartialCalibrationClass(sensor, m_skeletonCalibPoints, m_calibpoints);
+                //Debug.Print("Calibration done");
+            }
+            
         }
     }
 }

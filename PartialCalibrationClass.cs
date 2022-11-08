@@ -1,6 +1,7 @@
 ﻿using Microsoft.Kinect;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -82,7 +83,10 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
                 Point tResult1 = kinectToProjectionPoint(m_skeletonCalibPoints[1]);
                 Point tResult2 = kinectToProjectionPoint(m_skeletonCalibPoints[2]);
                 Point tResult3 = kinectToProjectionPoint(m_skeletonCalibPoints[3]);
+                Debug.Print("tResult0: " + tResult0.ToString() + " " + m_calibPoints[0].ToString());
+                Debug.Print("tResult1: "+ tResult1.ToString()+" " + m_calibPoints[1].ToString());
             }
+            Debug.Print("hello");
         }
 
         private Point3D conertSkeletonPointToDepthPoint(SkeletonPoint skeletonPoint)
@@ -92,7 +96,7 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
             return new Point3D(imgPt.X, imgPt.Y, imgPt.Depth);
         }
 
-        private Point kinectToProjectionPoint(SkeletonPoint point)
+        public Point kinectToProjectionPoint(SkeletonPoint point)
         {
             DepthImagePoint depthP = m_kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(point, DepthImageFormat.Resolution640x480Fps30);
             Point3D p = new Point3D(depthP.X, depthP.Y, depthP.Depth);
