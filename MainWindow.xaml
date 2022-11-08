@@ -66,6 +66,7 @@
             <StatusBarItem Padding="0 0 0 10">
                 <TextBlock Name="statusBarText" Margin="-1 0 0 0">Click 'Seated' to change skeletal pipeline type!</TextBlock>
             </StatusBarItem>
-        </StatusBar>       
+        </StatusBar>
+        <Button x:Name="callibrate" Content="callibrate" HorizontalAlignment="Left" Margin="678,0,0,0" Grid.Row="2" VerticalAlignment="Center" Click="setpositions"/>
     </Grid>
 </Window>

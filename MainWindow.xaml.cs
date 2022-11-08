@@ -11,6 +11,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows;
     using System.Windows.Media;
     using Microsoft.Kinect;
+    using Microsoft.Samples.Kinect.ControlsBasics;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -22,10 +24,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private const float RenderWidth = 640.0f;
 
+        private List<SkeletonPoint> m_skeletonCalibPoints = new List<SkeletonPoint>(); //3d skeleton points
+
         /// <summary>
         /// Height of our output drawing
         /// </summary>
         private const float RenderHeight = 480.0f;
+
+        private Skeleton[] skeletons;
 
         /// <summary>
         /// Thickness of drawn joint lines
@@ -67,11 +73,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>        
         private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
 
+
+
         /// <summary>
         /// Active Kinect sensor
         /// </summary>
         private KinectSensor sensor;
 
+        private PartialCalibrationClass callibrator;
         /// <summary>
         /// Drawing group for skeleton rendering output
         /// </summary>
@@ -155,8 +164,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (potentialSensor.Status == KinectStatus.Connected)
                 {
                     this.sensor = potentialSensor;
+
                     break;
                 }
+
             }
 
             if (null != this.sensor)
@@ -204,7 +215,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            Skeleton[] skeletons = new Skeleton[0];
+            this.skeletons = new Skeleton[0];
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
             {
@@ -229,7 +240,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
                             this.DrawBonesAndJoints(skel, dc);
-                            Debug.WriteLineIf(true,skel.Joints[JointType.HipCenter].Position.Z);
+                            ///Debug.WriteLineIf(true,skel.Joints[JointType.HipCenter].Position.Z);
                         }
                         else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
                         {
@@ -246,6 +257,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
+
         }
 
         /// <summary>
@@ -283,7 +295,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
             this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
             this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
- 
+
             // Render Joints
             foreach (Joint joint in skeleton.Joints)
             {
@@ -291,11 +303,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (joint.TrackingState == JointTrackingState.Tracked)
                 {
-                    drawBrush = this.trackedJointBrush;                    
+                    drawBrush = this.trackedJointBrush;
                 }
                 else if (joint.TrackingState == JointTrackingState.Inferred)
                 {
-                    drawBrush = this.inferredJointBrush;                    
+                    drawBrush = this.inferredJointBrush;
                 }
 
                 if (drawBrush != null)
@@ -370,6 +382,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 else
                 {
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+                }
+            }
+        }
+        private void setpositions(object sender, RoutedEventArgs e)
+        {
+            if (m_skeletonCalibPoints.Count < 4)
+            {
+                if (skeletons.Length != 0)
+                {
+                    m_skeletonCalibPoints.Add(skeletons[0].Joints[JointType.HipCenter].Position);
+                    Debug.WriteLine(m_skeletonCalibPoints.Count);
+                }
+                else
+                {
+                    List<Point> m_calibpoints = new List<Point>();
+                    m_calibpoints.Add(new Point(0, 0));
+                    m_calibpoints.Add(new Point(0, RenderHeight));
+                    m_calibpoints.Add(new Point(RenderWidth, RenderHeight));
+                    m_calibpoints.Add(new Point(RenderWidth, 0));
+                    callibrator = new PartialCalibrationClass(sensor, m_skeletonCalibPoints, m_calibpoints);
                 }
             }
         }

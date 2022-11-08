@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Media.Media3D; 
+using System.Windows.Media.Media3D;
 
 //shared with students
 
@@ -20,12 +20,15 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
         private Matrix3D m_groundPlaneTransform; //step 2 transform
         private Emgu.CV.Matrix<double> m_transform; //step 3 transform
 
-        public PartialCalibrationClass(KinectSensor kinectSensor)
+        public PartialCalibrationClass(KinectSensor kinectSensor, List<SkeletonPoint> skeletonPoints, List<Point> points)
         {
             m_kinectSensor = kinectSensor;
-            
-        }   
-       
+            m_calibPoints = points;
+            m_skeletonCalibPoints = skeletonPoints;
+            calibrate();
+        }
+
+
 
         private void calibrate()
         {
