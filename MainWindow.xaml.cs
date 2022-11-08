@@ -13,6 +13,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Kinect;
     using Microsoft.Samples.Kinect.ControlsBasics;
     using System.Collections.Generic;
+    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -215,12 +216,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            this.skeletons = new Skeleton[0];
+
+            
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
             {
                 if (skeletonFrame != null)
                 {
+                    this.skeletons = new Skeleton[0];
                     skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
                 }
@@ -233,19 +236,21 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (skeletons.Length != 0)
                 {
-                    if (callibrator != null)
-                    {
-                        Point player = callibrator.kinectToProjectionPoint(skeletons[0].Joints[JointType.HipCenter].Position);
-
-                       Debug.Print("x: " + player.X.ToString() + " y: " + player.Y.ToString());
-                    }
+                    
                     foreach (Skeleton skel in skeletons)
                     {
                         RenderClippedEdges(skel, dc);
-
+                        
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            this.DrawBonesAndJoints(skel, dc);
+                            if (callibrator != null)
+                            {
+                                Point player = callibrator.kinectToProjectionPoint(skel.Joints[JointType.Spine].Position);
+
+                                Debug.Print("x: " + player.X.ToString() + " y: " + player.Y.ToString());
+                                dc.DrawEllipse(centerPointBrush, trackedBonePen, player, 5, 5);
+                            }
+                            //this.DrawBonesAndJoints(skel, dc);
                             ///Debug.WriteLineIf(true,skel.Joints[JointType.HipCenter].Position.Z);
                         }
                         else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
@@ -399,7 +404,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 if (skeletons.Length != 0)
                 {
-                    m_skeletonCalibPoints.Add(skeletons[0].Joints[JointType.HipCenter].Position);
+                    m_skeletonCalibPoints.Add(skeletons[0].Joints[JointType.Spine].Position);
                     Debug.WriteLine(m_skeletonCalibPoints.Count);
                     //Debug.Print("aaaaaaa");
                 }
