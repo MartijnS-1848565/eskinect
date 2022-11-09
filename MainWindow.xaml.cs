@@ -43,7 +43,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Thickness of body center ellipse
         /// </summary>
         private const double BodyCenterThickness = 10;
-
+        private TicTacToe ticTacToe = new TicTacToe();
         /// <summary>
         /// Thickness of clip edge rectangles
         /// </summary>
@@ -139,7 +139,37 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     new Rect(RenderWidth - ClipBoundsThickness, 0, ClipBoundsThickness, RenderHeight));
             }
         }
+        private void drawPlayfield(TicTacToe tic,DrawingContext drawingContext)
+        {
+            
+            for (int i = 1; i < 3; i++)
+            {
+                drawingContext.DrawLine(new Pen(Brushes.Red, 2), new Point(0, RenderHeight*i / 3), new Point(RenderWidth, RenderHeight*i / 3));
+                drawingContext.DrawLine(new Pen(Brushes.Red, 2), new Point(RenderWidth*i/3,0), new Point(RenderWidth*i/3, RenderHeight));
+                
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (tic.getField(i, j) == Field.X)
+                    {
+                        drawingContext.DrawLine(new Pen(Brushes.Red, 2), new Point(RenderWidth * i / 3, RenderHeight * j / 3), new Point(RenderWidth * (i + 1) / 3, RenderHeight * (j + 1) / 3));
+                        drawingContext.DrawLine(new Pen(Brushes.Red, 2), new Point(RenderWidth * (i + 1) / 3, RenderHeight * j / 3), new Point(RenderWidth * i / 3, RenderHeight * (j + 1) / 3));
+                    }
+                    else if (tic.getField(i, j) == Field.O)
+                    {
+                        drawingContext.DrawEllipse(null, new Pen(Brushes.Red,2), new Point(RenderWidth * (i + 0.5) / 3, RenderHeight * (j + 0.5) / 3), RenderWidth / 6, RenderHeight / 6);
+                    }
+                }
+              
+               
 
+            }
+        }
+
+
+     
         /// <summary>
         /// Execute startup tasks
         /// </summary>
@@ -233,7 +263,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-
+                drawPlayfield(ticTacToe,dc);
                 if (skeletons.Length != 0)
                 {
                     
