@@ -148,6 +148,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 drawingContext.DrawLine(new Pen(Brushes.Red, 2), new Point(RenderWidth*i/3,0), new Point(RenderWidth*i/3, RenderHeight));
                 
             }
+           
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -169,7 +171,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
 
-     
+      
         /// <summary>
         /// Execute startup tasks
         /// </summary>
@@ -177,7 +179,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e">event arguments</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            /*Debug.Print(ticTacToe.setField(0, 0, Field.X).ToString()+" wuuut" );
+          Debug.Print(ticTacToe.setField(0, 2, Field.O).ToString());
+          Debug.Print(ticTacToe.setField(0, 1, Field.O).ToString());
+          Debug.Print(ticTacToe.setField(1, 1, Field.X).ToString());
+          Debug.Print(ticTacToe.setField(0, 0, Field.O).ToString());
+          Debug.Print(ticTacToe.setField(1, 0, Field.O).ToString());*/
             // Create the drawing group we'll use for drawing
+
+
+            Debug.Print(ticTacToe.setField(2, 2, Field.X).ToString());
             this.drawingGroup = new DrawingGroup();
 
             // Create an image source that we can use in our image control

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -28,13 +29,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
             lastplaced = Field.O;
         }
-        public Field getField(int row,int collum)
+        public Field getField(int collum,int row)
         {
             return board[row, collum];
         }
-        public Tuple<bool,bool> setField(int row, int collum,Field placing)
+        
+        public Tuple<bool,bool> setField(int collum, int row,Field placing)
         {
-            if (placing == lastplaced)
+            if (placing == lastplaced || board[row,collum]!=Field.Empty)
             {
                 return new Tuple<bool,bool>(false,false);
             }
@@ -43,7 +45,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             bool won = win(placing);
             return new Tuple<bool, bool>(won,true);
         }
-        public bool win(Field possibleWinner)
+        
+        private bool win(Field possibleWinner)
         {
             int diagonal = 0;
             int antidiagonal = 0;
@@ -53,25 +56,27 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 int transposeCounter = 0;
                 for (int j = 0; j < board.GetLength(1); j++)
                 {
-                    if (board[i,j]==possibleWinner)
+                    if (board[i, j] == possibleWinner)
                     {
                         counter++;
+                        //Debug.Print("why" + counter);
                     }
-                    if (board[j,i]==possibleWinner)
+                    if (board[j, i] == possibleWinner)
                     {
                         transposeCounter++;
                     }
-                    if (i == j && board[i,j]==possibleWinner)
+                    if (i == j && board[i, j] == possibleWinner)
                     {
                         diagonal++;
                     }
-                    if (i == board.GetLength(1) - 1 - j);
+                    if (i == board.GetLength(1) - 1 - j && board[i,j]==possibleWinner) 
                     {
                         antidiagonal++;
                     }
                 }
-                if (counter == 3||transposeCounter==3||diagonal==3||antidiagonal==3)
+                if (counter == 3 || transposeCounter == 3||diagonal==3||antidiagonal==3)
                 {
+                    Debug.Print(counter + " " + transposeCounter + " " + diagonal + " " + antidiagonal);
                     return true;
                 }
             }
