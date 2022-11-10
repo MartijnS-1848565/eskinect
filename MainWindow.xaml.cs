@@ -24,6 +24,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Width of output drawing
         /// </summary>
         private const float RenderWidth = 640.0f;
+        private bool player1=true;
 
         private List<SkeletonPoint> m_skeletonCalibPoints = new List<SkeletonPoint>(); //3d skeleton points
 
@@ -184,11 +185,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
           Debug.Print(ticTacToe.setField(0, 1, Field.O).ToString());
           Debug.Print(ticTacToe.setField(1, 1, Field.X).ToString());
           Debug.Print(ticTacToe.setField(0, 0, Field.O).ToString());
-          Debug.Print(ticTacToe.setField(1, 0, Field.O).ToString());*/
+          Debug.Print(ticTacToe.setField(1, 0, Field.O).ToString());
+            
+            Debug.Print(ticTacToe.setField(2, 2, Field.X).ToString());*/
             // Create the drawing group we'll use for drawing
 
 
-            Debug.Print(ticTacToe.setField(2, 2, Field.X).ToString());
             this.drawingGroup = new DrawingGroup();
 
             // Create an image source that we can use in our image control
@@ -288,10 +290,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             {
                                 Point player = callibrator.kinectToProjectionPoint(skel.Joints[JointType.Spine].Position);
 
-                                Debug.Print("x: " + player.X.ToString() + " y: " + player.Y.ToString());
+                                //Debug.Print("x: " + player.X.ToString() + " y: " + player.Y.ToString());
                                 dc.DrawEllipse(centerPointBrush, trackedBonePen, player, 5, 5);
                             }
-                            //this.DrawBonesAndJoints(skel, dc);
+                            this.DrawBonesAndJoints(skel, dc);
                             ///Debug.WriteLineIf(true,skel.Joints[JointType.HipCenter].Position.Z);
                         }
                         else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
@@ -461,6 +463,36 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 //Debug.Print("Calibration done");
             }
             
+        }
+        private void makeMove(object sender, RoutedEventArgs e)
+        {
+            if (skeletons.Length != 0)
+            {
+                if (callibrator != null)
+                {
+                    Point p = callibrator.kinectToProjectionPoint(skeletons[0].Joints[JointType.Spine].Position);
+                    int x = (int)(p.X *3/ RenderWidth);
+                    int y = (int)(p.Y *3/ RenderHeight);
+                    Debug.Print(" x: " + x + " y: " + y);
+                    if (player1) {
+                        if (ticTacToe.setField(x, y, Field.X).Item2)
+                        {
+                            player1 = false;
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        if (ticTacToe.setField(x, y, Field.O).Item2)
+                        {
+                            player1 = true;
+
+                        }
+                    }
+                    //Debug.Print("bbbbbbb");}
+                }
+            }
         }
     }
 }

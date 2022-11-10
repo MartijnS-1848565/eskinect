@@ -68,5 +68,6 @@
             </StatusBarItem>
         </StatusBar>
         <Button x:Name="callibrate" Content="callibrate" HorizontalAlignment="Right" Margin="671,0,0,0" Grid.Row="2" VerticalAlignment="Center" Click="setpositions"/>
+        <Button Content="move" HorizontalAlignment="Center" Grid.Row="2" VerticalAlignment="Center" Click="makeMove"/>
     </Grid>
 </Window>
