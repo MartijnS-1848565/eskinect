@@ -15,6 +15,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Collections.Generic;
     using System.Windows.Controls;
     using System.Windows.Forms;
+    using System.Globalization;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -278,13 +279,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-                drawPlayfield(ticTacToe,dc);
+               
                 if (skeletons.Length != 0)
                 {
-           
+
                     //when callibrating we need to check for the gesture for calibration.
-                    if (callibrator == null) {
+                    if (callibrator == null)
+                    {
                         calibPointDetection();
+                        drawCalibPoint(dc);
+                    }
+                    else {
+                        drawPlayfield(ticTacToe, dc);
                     }
 
                     foreach (Skeleton skel in skeletons)
@@ -300,7 +306,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 //Debug.Print("x: " + player.X.ToString() + " y: " + player.Y.ToString());
                                 dc.DrawEllipse(centerPointBrush, trackedBonePen, player, 5, 5);
                             }
-                            this.DrawBonesAndJoints(skel, dc);
+                            else {  //we only draw bones while calibrating
+                                this.DrawBonesAndJoints(skel, dc);
+                            }
                             ///Debug.WriteLineIf(true,skel.Joints[JointType.HipCenter].Position.Z);
                         }
                         else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
@@ -480,6 +488,44 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
             return new SkeletonGesture(status, skeletonindex);
         }
+
+
+
+
+        private void drawCalibPoint(DrawingContext dc) {
+            int pointSize = 30;
+            dc.DrawText(
+       new FormattedText("Stand on the yellow square and \nput your left hand up \nto calibrate point",
+          CultureInfo.GetCultureInfo("en-us"),FlowDirection,
+          new Typeface("Verdana"),
+          36, System.Windows.Media.Brushes.LightBlue),
+          new System.Windows.Point(20, RenderHeight/3));
+            Point p = new Point(0,0);
+            if (m_skeletonCalibPoints.Count == 0) {
+                p.X = 0;
+                p.Y = 0;
+            }
+            else if (m_skeletonCalibPoints.Count == 1)
+            {
+                p.X = 0;
+                p.Y = RenderHeight- pointSize;
+            }
+            else if (m_skeletonCalibPoints.Count == 2)
+            {
+                p.X = RenderWidth - pointSize;
+                p.Y = RenderHeight - pointSize;
+            }
+            else if (m_skeletonCalibPoints.Count == 3)
+            {
+                p.X = RenderWidth - pointSize;
+                p.Y = 0;
+            }
+
+            dc.DrawRectangle(Brushes.Yellow, null, new Rect(p.X, p.Y, pointSize, pointSize));
+          
+
+        }
+
 
 
         //resets calibration 
