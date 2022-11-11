@@ -14,6 +14,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Samples.Kinect.ControlsBasics;
     using System.Collections.Generic;
     using System.Windows.Controls;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -82,6 +83,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private KinectSensor sensor;
 
+        //data for calibration
+        private bool InCalibration = false;
+        private bool gestureActive = false; //detect if the gesture is still active or if it's new.
         private PartialCalibrationClass callibrator;
         /// <summary>
         /// Drawing group for skeleton rendering output
@@ -189,8 +193,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             Debug.Print(ticTacToe.setField(2, 2, Field.X).ToString());*/
             // Create the drawing group we'll use for drawing
-
-
             this.drawingGroup = new DrawingGroup();
 
             // Create an image source that we can use in our image control
@@ -279,14 +281,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 drawPlayfield(ticTacToe,dc);
                 if (skeletons.Length != 0)
                 {
-                    
+           
+                    //when callibrating we need to check for the gesture for calibration.
+                    if (callibrator == null) {
+                        calibPointDetection();
+                    }
+
                     foreach (Skeleton skel in skeletons)
                     {
                         RenderClippedEdges(skel, dc);
-                        
+                     
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            if (callibrator != null)
+                            if (callibrator != null)    //if calibrated.
                             {
                                 Point player = callibrator.kinectToProjectionPoint(skel.Joints[JointType.Spine].Position);
 
@@ -441,18 +448,63 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
         }
-        private void setpositions(object sender, RoutedEventArgs e)
+
+
+        //this function detects if the left hand is above the left shoulder. 
+        private SkeletonGesture detectLeftHandAboveShoulder() {
+            bool hasGesture = false;
+            int skeletonindex = 0;
+            bool status = false;
+            foreach (Skeleton skeleton in skeletons) { 
+                SkeletonPoint shoulderLeft = skeleton.Joints[JointType.ShoulderLeft].Position;
+                SkeletonPoint handLeft = skeleton.Joints[JointType.HandLeft].Position;
+
+                bool inGesture = shoulderLeft.Y < handLeft.Y;
+                if (inGesture)
+                {
+                    hasGesture = true;
+                    break;
+                }
+                skeletonindex++;
+                
+            }
+            if (hasGesture && !gestureActive)
+            {
+                Debug.WriteLine("New gesture found");
+                gestureActive = true;
+                status = true;
+            }
+            else if (!hasGesture && gestureActive){
+                Debug.WriteLine("gesture ended");
+                gestureActive = false;
+            }
+            return new SkeletonGesture(status, skeletonindex);
+        }
+
+
+        //resets calibration 
+        private void startCalibration(object sender, RoutedEventArgs e) {
+            callibrator = null; //set the callibrator to 0
+            m_skeletonCalibPoints = new List<SkeletonPoint>();  //reset the calibration points
+        }
+        
+        //in this function we check if a skeleton is making a gesture, if so we add it's position to the calib points.
+        private void calibPointDetection()
         {
             if (m_skeletonCalibPoints.Count < 4)
             {
                 if (skeletons.Length != 0)
                 {
-                    m_skeletonCalibPoints.Add(skeletons[0].Joints[JointType.Spine].Position);
-                    Debug.WriteLine(m_skeletonCalibPoints.Count);
-                    //Debug.Print("aaaaaaa");
+                    SkeletonGesture gesture = detectLeftHandAboveShoulder();
+                    if (gesture.hasGesture()) { //check if user is making a gesture
+                        m_skeletonCalibPoints.Add(skeletons[gesture.getSkeletonIndex()].Joints[JointType.Spine].Position);
+                        Debug.WriteLine(m_skeletonCalibPoints.Count);
+                        //Debug.Print("aaaaaaa");
+                    }
                 }
             }
-            else
+            //if we have 4 points make calibration
+            if (m_skeletonCalibPoints.Count == 4)
             {
                 List<Point> m_calibpoints = new List<Point>();
                 m_calibpoints.Add(new Point(0, 0));
@@ -464,6 +516,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
             
         }
+
+
+
+
+
         private void makeMove(object sender, RoutedEventArgs e)
         {
             if (skeletons.Length != 0)
