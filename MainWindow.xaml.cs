@@ -273,6 +273,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
                 }
+                else {  //to prevent crash in case skeletonFrame is not found on first frame
+                    return;
+                }
             }
 
             using (DrawingContext dc = this.drawingGroup.Open())
@@ -291,6 +294,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     }
                     else {
                         drawPlayfield(ticTacToe, dc);
+                        detectPlayerMove(); //check
                     }
 
                     foreach (Skeleton skel in skeletons)
@@ -565,7 +569,40 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
 
 
+        private void detectPlayerMove()
+        {
 
+
+            if (skeletons.Length != 0)
+            {
+                SkeletonGesture gesture = detectLeftHandAboveShoulder();
+                if (callibrator != null && gesture.hasGesture())
+                {    
+                    Point p = callibrator.kinectToProjectionPoint(skeletons[gesture.getSkeletonIndex()].Joints[JointType.Spine].Position);
+                    int x = (int)(p.X * 3 / RenderWidth);
+                    int y = (int)(p.Y * 3 / RenderHeight);
+                    Debug.Print(" x: " + x + " y: " + y);
+                    if (player1)
+                    {
+                        if (ticTacToe.setField(x, y, Field.X).Item2)
+                        {
+                            player1 = false;
+
+                        }
+
+                    }
+                    else
+                    {
+                        if (ticTacToe.setField(x, y, Field.O).Item2)
+                        {
+                            player1 = true;
+
+                        }
+                    }
+                    //Debug.Print("bbbbbbb");}
+                }
+            }
+        }
 
         private void makeMove(object sender, RoutedEventArgs e)
         {
