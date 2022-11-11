@@ -16,6 +16,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows.Controls;
     using System.Windows.Forms;
     using System.Globalization;
+    using System;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -27,7 +28,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private const float RenderWidth = 640.0f;
         private bool player1=true;
-
+        private int WinningPlayer = 0;
         private List<SkeletonPoint> m_skeletonCalibPoints = new List<SkeletonPoint>(); //3d skeleton points
 
         /// <summary>
@@ -293,8 +294,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         drawCalibPoint(dc);
                     }
                     else {
-                        drawPlayfield(ticTacToe, dc);
-                        detectPlayerMove(); //check
+                        
+                        if (WinningPlayer == 0)
+                        { //if we have no winner.
+                            drawPlayfield(ticTacToe, dc);
+                            detectPlayerMove(); //check
+                        }
+                        else {
+                            drawWinner(dc);
+                        }
                     }
 
                     foreach (Skeleton skel in skeletons)
@@ -334,6 +342,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
             
         }
+
+     
 
         /// <summary>
         /// Draws a skeleton's bones and joints
@@ -568,6 +578,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
 
+        private void drawWinner(DrawingContext dc)
+        {
+            int width = 20;
+            String text = "";
+            if (WinningPlayer == 3)
+            {
+                text = "it's a tie";
+                width = 150;
+            }
+            else {
+                text = "Player " + WinningPlayer + " Has won the game!";
+            }
+            dc.DrawText(
+       new FormattedText(text,
+          CultureInfo.GetCultureInfo("en-us"), FlowDirection,
+          new Typeface("Verdana"),
+          36, System.Windows.Media.Brushes.LightBlue),
+          new System.Windows.Point(width, RenderHeight / 3));
+        }
+
 
         private void detectPlayerMove()
         {
@@ -581,57 +611,61 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     Point p = callibrator.kinectToProjectionPoint(skeletons[gesture.getSkeletonIndex()].Joints[JointType.Spine].Position);
                     int x = (int)(p.X * 3 / RenderWidth);
                     int y = (int)(p.Y * 3 / RenderHeight);
+
+                    if (x >= 4 || y >= 4) {    //out of bounds checking
+                        return;
+                    } else if (x < 0 || y < 0) {
+                        return;
+                    }
+
                     Debug.Print(" x: " + x + " y: " + y);
+                    Tuple<bool, bool> gameState;
                     if (player1)
                     {
-                        if (ticTacToe.setField(x, y, Field.X).Item2)
+                        gameState = ticTacToe.setField(x, y, Field.X);
+                        if (gameState.Item2)
                         {
                             player1 = false;
 
                         }
-
+                        if (gameState.Item1)
+                        {
+                            Debug.WriteLine("Player 1 has won.");
+                            WinningPlayer = 1;
+                        }
                     }
                     else
                     {
-                        if (ticTacToe.setField(x, y, Field.O).Item2)
+                        gameState = ticTacToe.setField(x, y, Field.O);
+                        if (gameState.Item2)
                         {
                             player1 = true;
 
                         }
+                        if (gameState.Item1)
+                        {
+                            Debug.WriteLine("Player 2 has won.");
+                            WinningPlayer = 2;
+                        }
                     }
+                    if (ticTacToe.isTie()) {
+                        WinningPlayer = 3;
+                    }
+                  
                     //Debug.Print("bbbbbbb");}
                 }
             }
         }
 
-        private void makeMove(object sender, RoutedEventArgs e)
+       
+        private void resetBoard(object sender, RoutedEventArgs e)
         {
-            if (skeletons.Length != 0)
+            if (callibrator != null)
             {
-                if (callibrator != null)
-                {
-                    Point p = callibrator.kinectToProjectionPoint(skeletons[0].Joints[JointType.Spine].Position);
-                    int x = (int)(p.X *3/ RenderWidth);
-                    int y = (int)(p.Y *3/ RenderHeight);
-                    Debug.Print(" x: " + x + " y: " + y);
-                    if (player1) {
-                        if (ticTacToe.setField(x, y, Field.X).Item2)
-                        {
-                            player1 = false;
-                            
-                        }
-
-                    }
-                    else
-                    {
-                        if (ticTacToe.setField(x, y, Field.O).Item2)
-                        {
-                            player1 = true;
-
-                        }
-                    }
-                    //Debug.Print("bbbbbbb");}
-                }
+                player1 = true;
+                WinningPlayer = 0;
+                ticTacToe = new TicTacToe();
+                               
             }
         }
     }

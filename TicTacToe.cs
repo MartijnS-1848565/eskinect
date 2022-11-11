@@ -18,6 +18,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     {
         private Field[,] board = new Field[3,3];
         private Field lastplaced;
+        private int moveCounter = 0;
         public TicTacToe()
         {
             for (int i = 0; i < board.GetLength(0); i++)
@@ -33,7 +34,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             return board[row, collum];
         }
-        
+
+        public bool isTie() {
+            if (moveCounter >= 9 && !win(Field.X) && !win(Field.O)) {
+                return true;
+            }
+
+            return false;
+        }
+
         public Tuple<bool,bool> setField(int collum, int row,Field placing)
         {
             if (placing == lastplaced || board[row,collum]!=Field.Empty)
@@ -42,6 +51,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
             board[row, collum] = placing;
             lastplaced = placing;
+            moveCounter++;
             bool won = win(placing);
             return new Tuple<bool, bool>(won,true);
         }
