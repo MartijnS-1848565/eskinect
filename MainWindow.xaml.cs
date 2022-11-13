@@ -88,6 +88,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         //data for calibration
         private bool InCalibration = false;
         private bool gestureActive = false; //detect if the gesture is still active or if it's new.
+        
         private PartialCalibrationClass callibrator;
         /// <summary>
         /// Drawing group for skeleton rendering output
@@ -286,7 +287,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                
                 if (skeletons.Length != 0)
                 {
-
+                    
                     //when callibrating we need to check for the gesture for calibration.
                     if (callibrator == null)
                     {
@@ -294,11 +295,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         drawCalibPoint(dc);
                     }
                     else {
-                        
+                        if (detectHandOnShoulder().hasGesture())
+                        {
+                            reset();
+                        }
                         if (WinningPlayer == 0)
                         { //if we have no winner.
                             drawPlayfield(ticTacToe, dc);
                             detectPlayerMove(); //check
+
+                            
+
                         }
                         else {
                             drawWinner(dc);
@@ -471,6 +478,36 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
+        
+        private SkeletonGesture detectHandOnShoulder() {
+            bool hasGesture = false;
+            int skeletonindex = 0;
+            bool status = false;
+            foreach (Skeleton skeleton in skeletons)
+            {
+                SkeletonPoint shoulderLeft = skeleton.Joints[JointType.ShoulderLeft].Position;
+                SkeletonPoint spine = skeleton.Joints[JointType.Spine].Position;
+                SkeletonPoint handRight = skeleton.Joints[JointType.HandRight].Position;
+
+                bool inGesture = handRight.X < spine.X && handRight.Y > shoulderLeft.Y;
+                if (inGesture)
+                {
+                    hasGesture = true;
+                    break;
+                }
+                skeletonindex++;
+
+            }
+            if (hasGesture /*&& !gestureActive*/)
+            {
+                Debug.WriteLine("New gesture found (crossed)");
+               // gestureActive = true;
+                status = true;
+            }
+           
+            return new SkeletonGesture(status, skeletonindex);
+        }
+
 
         //this function detects if the left hand is above the left shoulder. 
         private SkeletonGesture detectLeftHandAboveShoulder() {
@@ -500,6 +537,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 Debug.WriteLine("gesture ended");
                 gestureActive = false;
             }
+
+           
             return new SkeletonGesture(status, skeletonindex);
         }
 
@@ -657,16 +696,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-       
-        private void resetBoard(object sender, RoutedEventArgs e)
-        {
+        private void reset() {
             if (callibrator != null)
             {
                 player1 = true;
                 WinningPlayer = 0;
                 ticTacToe = new TicTacToe();
-                               
+
             }
+        }
+        private void resetBoard(object sender, RoutedEventArgs e)
+        {
+            reset();
         }
     }
 }
