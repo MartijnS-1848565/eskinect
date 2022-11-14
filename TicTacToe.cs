@@ -45,6 +45,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         public Tuple<bool,bool> setField(int collum, int row,Field placing)
         {
+            Debug.Print(collum+" "+ row);
             if (placing == lastplaced || board[row,collum]!=Field.Empty)
             {
                 return new Tuple<bool,bool>(false,false);

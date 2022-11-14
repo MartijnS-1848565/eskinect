@@ -651,7 +651,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     int x = (int)(p.X * 3 / RenderWidth);
                     int y = (int)(p.Y * 3 / RenderHeight);
 
-                    if (x >= 4 || y >= 4) {    //out of bounds checking
+                    if (x >= 3  || y >= 3) {    //out of bounds checking
                         return;
                     } else if (x < 0 || y < 0) {
                         return;
