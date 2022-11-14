@@ -240,7 +240,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             if (null == this.sensor)
             {
-                this.statusBarText.Text = Properties.Resources.NoKinectReady;
+                //this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
         }
 
@@ -466,7 +466,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void CheckBoxSeatedModeChanged(object sender, RoutedEventArgs e)
         {
             if (null != this.sensor)
-            {
+            {/*
                 if (this.checkBoxSeatedMode.IsChecked.GetValueOrDefault())
                 {
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
@@ -474,7 +474,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 else
                 {
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
-                }
+                }*/
             }
         }
 
